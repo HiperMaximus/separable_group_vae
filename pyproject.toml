@@ -1,0 +1,16 @@
+[project]
+name = "separable-group-vae"
+version = "0.1.0"
+description = "Implementation of Separable Group VAE"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv.workspace]
+members = [
+    "python3.13",
+]
+
+[tool.ruff]
+target-version = "py312"
+
