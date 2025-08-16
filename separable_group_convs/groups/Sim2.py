@@ -120,7 +120,6 @@ class SO2(Group):
             torch.Tensor: A tensor of ones with the same shape and device as g.
 
         """
-        # This operation is inherently device-aware due to `ones_like`.
         return torch.ones_like(g)
 
     def normalize(self, g: torch.Tensor) -> torch.Tensor:
