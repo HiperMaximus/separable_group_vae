@@ -2,7 +2,9 @@
 
 ## 1. Project Overview
 
-This document provides a comprehensive theoretical and practical guide to implementing a Group Convolutional Neural Network (G-CNN) that is equivariant to the action of the 2D Similarity group, $Sim(2)$. The $Sim(2)$ group is the set of transformations on $\mathbb{R}^2$ comprising translations, rotations, and isotropic scaling. An image, conceptualized as a function $f: \mathbb{R}^2 \to \mathbb{R}^C$, is transformed under the action of an element $g \in Sim(2)$. A network is said to be equivariant if a transformation of the input image results in an equivalent transformation of the network's feature representations.
+This document provides a comprehensive theoretical and practical guide to implementing a Group Convolutional Neural Network (G-CNN) that is equivariant to the action of the 2D Similarity group, $Sim(2)$. The $Sim(2)$ group is the set of transformations on $\mathbb{R}^2$ comprising translations, rotations, and isotropic scaling. This  repository is concerned mainly on the application to medical images (in particular histopathological images). 
+
+To this end an image, is conceptualized as a function $f: \mathbb{R}^2 \to \mathbb{R}^C$ (usually $C = 3$ for RGB images), so it can be thought as the coordinates of the $xy$-plane mapped to individual pixel values. In particular for medical images, these images can be transformed under the action of an element $g \in Sim(2)$ and conserve their properties (a cancerous cell is the same cancerous cell regardless of translation, zoom or rotation). A network is said to be equivariant if a transformation of the input (image) results in an equivalent transformation of the network's feature representations (e.g. rotation of the input rotates the same way the feature representations).
 
 The motivation for enforcing $Sim(2)$-equivariance is to build a strong geometric inductive bias into the model. This enables the network to generalize from a single view of an object to recognize it under different positions, orientations, and scales, thereby improving data efficiency and robustness.
 
@@ -26,7 +28,7 @@ where $g, \tilde{g} \in G$ and $\mu$ is the left-invariant Haar measure on $G$. 
 
 ### 2.2. The $Sim(2)$ Group
 
-The group $Sim(2)$ is an affine Lie group that can be expressed as the semidirect product $G = \mathbb{R}^2 \rtimes H$, where $H = SO(2) \times \mathbb{R}^+$ is the subgroup of rotations and scalings. An element $g \in G$ is a pair $(x, h)$ where $x \in \mathbb{R}^2$ is a translation vector and $h = (R_\theta, s) \in H$ is a rotation-scaling matrix ($s \in \mathbb{R}^+, R_\theta \in SO(2)$).
+The group $Sim(2)$ is an affine Lie group that can be expressed as the semidirect product $G = \mathbb{R}^2 \rtimes H$, where $H = SO(2) \times \mathbb{R}^+$ is the subgroup of rotations and scalings. An element $g \in G$ is a pair $(x, h)$ where $x \in \mathbb{R}^2$ is a translation vector and $h = (R_\theta, s) \in H$ is a rotation-scaling representation ($s \in \mathbb{R}^+, R_\theta \in SO(2)$).
 
 The group product is $(x, h) \cdot (\tilde{x}, \tilde{h}) = (x + h\tilde{x}, h\tilde{h})$, and the inverse is $(x, h)^{-1} = (-h^{-1}x, h^{-1})$.
 
@@ -40,7 +42,7 @@ $$f_{\text{out}}(x, h) = (f_{\text{in}} \star_{\text{lift}} k_{\mathbb{R}^2})(x,
 The group action on the kernel is defined as $(\mathcal{L}_h[k])(y) = \frac{1}{|\det(h)|} k(h^{-1}y)$. For $h=(R_\theta, s)$, $|\det(h)| = s^2$.
 
 **Separable Group Convolution (Subsequent Layers):**
-For a feature map $f: G \to \mathbb{R}^{C_{in}}$, a full group convolution is computationally expensive. We assume the kernel $k: G \to \mathbb{R}$ is separable, i.e., $k(x, h) = k_{\mathbb{R}^2}(x) \cdot k_H(h)$. The group convolution integral can then be factorized:
+For a feature map $f: G \to \mathbb{R}^{C_{in}}$, a full group convolution is computationally expensive. So we assume the kernel $k: G \to \mathbb{R}$ is separable, i.e., $k(x, h) = k_{\mathbb{R}^2}(x) \cdot k_H(h)$. The group convolution integral can then be factorized:
 
 $$(f \star_G k)(x, h) = \int_{\mathbb{R}^2} \underbrace{\left( \int_H f(\tilde{x}, \tilde{h}) k_H(h^{-1}\tilde{h}) \, d\mu_H(\tilde{h}) \right)}_{\text{Step 1: Subgroup Convolution}} \cdot \underbrace{(\mathcal{L}_h[k_{\mathbb{R}^2}])(\tilde{x}-x)}_{\text{Step 2: Spatial Convolution}} \, d\tilde{x}$$
 
@@ -52,7 +54,7 @@ This factorization allows for a more efficient two-step implementation.
 
 ### Step 1: Abstract `Group` Interface
 
-Define an abstract base class `Group` inheriting from `torch.nn.Module` to provide a standardized interface for all Lie group implementations. This ensures modularity and consistency.
+Define an abstract base class `Group` inheriting from `torch.nn.Module` to provide a standardized interface for all Lie group implementations.
 
 **Required Methods:**
 * `product(g1, g2)`: Implements the group multiplication $g_1 \cdot g_2$.
@@ -140,6 +142,6 @@ This involves creating `torch.nn.Module`s for the lifting and group convolution 
 Combine the custom layers into a cohesive model, such as a ResNet.
 
 1.  **Lifting Layer**: The first layer of the network is the `LiftingConvolution` module.
-2.  **Equivariant Body**: The main body consists of a series of blocks, each containing one or more `SeparableGroupConvolution` layers, interspersed with standard layers like `BatchNorm` and non-linear activations.
+2.  **Equivariant Body**: The main body consists of a series of blocks, each containing one or more `SeparableGroupConvolution` layers and non-linear activations.
 3.  **Invariant Pooling**: After the final equivariant block, the feature map has shape $(B, C_{final}, N_h, H_{out}, W_{out})$. To achieve a final prediction that is invariant to the group action, apply a pooling operation (e.g., max or mean) across the group dimension (dim=2). The result is an invariant feature map of shape $(B, C_{final}, H_{out}, W_{out})$.
-4.  **Classifier Head**: Apply global average pooling over the spatial dimensions, followed by one or more `torch.nn.Linear` layers to produce the final output logits.
+4.  **VAE Head**: Flatten or apply global average pooling over the spatial dimensions, followed by one or more `torch.nn.Linear` layers to produce the final output logits.
