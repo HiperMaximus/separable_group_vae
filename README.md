@@ -35,9 +35,9 @@ The group product is $(x, h) \cdot (\tilde{x}, \tilde{h}) = (x + h\tilde{x}, h\t
 ### 2.3. Lifting and Group Convolution Layers
 
 **Lifting Convolution (Layer 1):**
-The initial layer must "lift" a standard 2D image, $f_{\text{in}}: \mathbb{R}^2 \to \mathbb{R}^{C_{in}}$, to a feature map on the group, $f_{\text{out}}: G \to \mathbb{R}^{C_{out}}$. This is achieved by convolving the input with a bank of kernels, where each kernel is a transformed version of a base spatial kernel $k_{\mathbb{R}^2}: \mathbb{R}^2 \to \mathbb{R}^{C_{out} \times C_{in}}$.
+The initial layer must "lift" a standard 2D image, \(f_{\text{in}}: \mathbb{R}^2 \to \mathbb{R}^{C_{in}}\), to a feature map on the group, $f_{\text{out}}: G \to \mathbb{R}^{C_{out}}$. This is achieved by convolving the input with a bank of kernels, where each kernel is a transformed version of a base spatial kernel $k_{\mathbb{R}^2}: \mathbb{R}^2 \to \mathbb{R}^{C_{out} \times C_{in}}$.
 
-$$f_{\text{out}}(x, h) = (f_{\text{in}} \star_{\text{lift}} k_{\mathbb{R}^2})(x, h) = \int_{\mathbb{R}^2} f_{\text{in}}(\tilde{x}) \cdot (\mathcal{L}_h[k_{\mathbb{R}^2}])(\tilde{x}-x) \, d\tilde{x}$$
+\(f_{\text{out}}(x, h) = (f_{\text{in}} \star_{\text{lift}} k_{\mathbb{R}^2})(x, h) = \int_{\mathbb{R}^2} f_{\text{in}}(\tilde{x}) \cdot (\mathcal{L}_h[k_{\mathbb{R}^2}])(\tilde{x}-x) \, d\tilde{x}\)
 
 The group action on the kernel is defined as $(\mathcal{L}_h[k])(y) = \frac{1}{|\det(h)|} k(h^{-1}y)$. For $h=(R_\theta, s)$, $|\det(h)| = s^2$.
 
