@@ -24,7 +24,7 @@ Let $G$ be a Lie group. A feature map in a G-CNN is a function $f: G \to \mathbb
 
 $$(f \star_G k)(g) = \int_G k(g^{-1}\tilde{g}) f(\tilde{g}) \, d\mu(\tilde{g})$$
 
-where $g, \tilde{g} \in G$ and $\mu$ is the left-invariant Haar measure on $G$. This operation is equivariant to the left-regular representation of the group, i.e., $(\mathcal{L}_{g'}f) \star_G k = \mathcal{L}_{g'}(f \star_G k)$, where $(\mathcal{L}_{g'}f)(g) = f(g'^{-1}g)$.
+where $$g, \tilde{g} \in G$$ and $$\mu$$ is the left-invariant Haar measure on $$G$$. This operation is equivariant to the left-regular representation of the group, i.e., $$(\mathcal{L}_{g'}f) \star_G k = \mathcal{L}_{g'}(f \star_G k)$$, where $$(\mathcal{L}_{g'}f)(g) = f(g'^{-1}g)$$.
 
 ### 2.2. The $Sim(2)$ Group
 
